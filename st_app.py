@@ -8,7 +8,7 @@ import urllib.request
 # Database Connection
 #DB_URI = r'sqlite:///C:/Users/DELL/Documents/PBI_assignment2/data.sqlite'
 DB_PATH = "data.sqlite"
-CLOUD_DB_URL = st.secrets['https://huggingface.co/datasets/aryashukla/sales-analytics/resolve/main/data.sqlite']
+CLOUD_DB_URL = st.secrets['CLOUD_DB_URL']
 
 if not os.path.exists(DB_PATH):
   with st.spinner("Downloading sales database from Hugging Face..."):
