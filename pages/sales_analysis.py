@@ -1,13 +1,25 @@
 import streamlit as st
 import pandas as pd
-from sqlalchemy import create_engine
+#from sqlalchemy import create_engine
+import sqlite3
+import urllib
+import os
 import altair as alt
+
+DB_URI = r'sqlite:///C:/Users/DELL/Documents/PBI_assignment2/data.sqlite'
+DB_PATH = "data.sqlite"
+CLOUD_DB_URL = st.secrets['CLOUD_DB_URL']
+
+if not os.path.exists(DB_PATH):
+  with st.spinner("Downloading sales database from Hugging Face..."):
+    try:
+      urllib.request.urlretrieve(CLOUD_DB_URL, DB_PATH)
+    except Exception as error:
+      st.error(f"Failed to download database: {error}")
 
 st.set_page_config(page_title="Sales Analysis", layout="wide")
 
-DB_URI = r'sqlite:///C:/Users/DELL/Documents/PBI_assignment2/data.sqlite'
-engine = create_engine(DB_URI)
-
+connection = sqlite3.connect(DB_PATH)
 @st.cache_data
 def load_sales_data():
     query = """
@@ -22,8 +34,7 @@ def load_sales_data():
         LEFT JOIN adventureworksproductlookup p ON s.ProductKey = p.ProductKey 
         LEFT JOIN adventureworksproductsubcategorieslookup cat ON p.ProductSubcategoryKey = cat.ProductSubcategoryKey
     """
-    with engine.connect() as connection:
-        df = pd.read_sql(query, con=connection)
+    df = pd.read_sql(query, con=connection)
     
     df['order_quantity'] = pd.to_numeric(df['order_quantity'], errors='coerce').fillna(0)
     df['product_price'] = pd.to_numeric(df['product_price'], errors='coerce').fillna(0.0)
